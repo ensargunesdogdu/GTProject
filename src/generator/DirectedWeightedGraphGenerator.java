@@ -17,22 +17,36 @@ public class DirectedWeightedGraphGenerator {
         random = new Random();
     }
 
+    //Generate a directed weighted graph(used capacity as a weight)
     public static Digraph generate(int numberOfVertices, int numberOfEdges, int maxCapacity) {
-        if (numberOfEdges > (long) numberOfVertices * (numberOfVertices - 1) / 2)
+        if (numberOfEdges > (long) numberOfVertices * (numberOfVertices - 1) / 2) // Guards for creating meaningfull graph
             throw new IllegalArgumentException("Too many edges");
         if (numberOfEdges < 0) throw new IllegalArgumentException("Too few edges");
         Digraph G = new Digraph(numberOfVertices);
-        Set<Edge> set = new TreeSet<Edge>();
+        Set<Edge> set = new TreeSet<>(); //
         int[] vertices = new int[numberOfVertices];
-        for (int i = 0; i < numberOfVertices; i++)
+        for (int i = 0; i < numberOfVertices; i++) {
+            while (true) {
+                int random = getRandom(numberOfVertices);
+                int randomCapacity = getRandom(maxCapacity);
+                Edge e = new Edge(i, random, randomCapacity);
+                if (random != i && !set.contains(e)) {
+                    G.addEdge(e);
+                    break;
+                }
+            }
             vertices[i] = i;
-        shuffle(vertices);
+        }
+        shuffle(vertices); // to increase randomness shuffle vertices.
         while (G.getEdges().size() < numberOfEdges) {
-            int v = uniform(numberOfVertices);
-            int w = uniform(numberOfVertices);
-            int randomCapacity = random.nextInt(maxCapacity);
-            Edge e = new Edge(v, w, randomCapacity);
-            if ((v < w) && !set.contains(e)) {
+            int v = getRandom(numberOfVertices);
+            int w = getRandom(numberOfVertices);
+            int s = vertices[v];
+            int t = vertices[w];
+            int randomCapacity = getRandom(maxCapacity);
+            Edge e = new Edge(s, t, randomCapacity);
+            Double thresh = new Double(numberOfEdges / (double) numberOfVertices) * 1.5;
+            if ((s < t) && !set.contains(e) && G.getNode(s).getEdges().size() < thresh.intValue()) {
                 set.add(e);
                 G.addEdge(e);
             }
@@ -41,18 +55,16 @@ public class DirectedWeightedGraphGenerator {
     }
 
     private static void shuffle(int[] vertices) {
-        if (vertices == null) throw new NullPointerException("argument array is null");
         int N = vertices.length;
         for (int i = 0; i < N; i++) {
-            int r = i + uniform(N - i);     // between i and N-1
+            int r = i + getRandom(N - i);
             int temp = vertices[i];
             vertices[i] = vertices[r];
             vertices[r] = temp;
         }
     }
 
-    public static int uniform(int n) {
-        if (n <= 0) throw new IllegalArgumentException("Parameter N must be positive");
+    public static int getRandom(int n) {
         return random.nextInt(n);
     }
 }

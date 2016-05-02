@@ -14,19 +14,19 @@ import java.util.Queue;
 
 
 public class EdmondsKarp {
-    public static int getMaxFlow(Digraph g, int s, int t) {
+    public static int getMaxFlow(Digraph g, int source, int sink) {
         int n = g.getNodeCount();
         int[][] F = new int[n][n];// Residual capacity from u to v is C[u][v] - F[u][v]
         int[][] C = g.getCapacityMatrix();
         while (true) {
-            int[] P = new int[n]; // Parent table
+            int[] P = new int[n];
             Arrays.fill(P, -1);
-            P[s] = s;
-            int[] M = new int[n]; // Capacity of path to node
-            M[s] = Integer.MAX_VALUE;
-            // BFS queue
+            P[source] = source;
+            int[] M = new int[n];
+            M[source] = Integer.MAX_VALUE;
+            // Queue
             Queue<Integer> Q = new LinkedList<Integer>();
-            Q.offer(s);
+            Q.offer(source);
             LOOP:
             while (!Q.isEmpty()) {
                 int u = Q.poll();
@@ -37,14 +37,14 @@ public class EdmondsKarp {
                     if (C[u][v] - F[u][v] > 0 && P[v] == -1) {
                         P[v] = u;
                         M[v] = Math.min(M[u], C[u][v] - F[u][v]);
-                        if (v != t)
+                        if (v != sink)
                             Q.offer(v);
                         else {
                             // Backtrack search, and write flow
                             while (P[v] != v) {
                                 u = P[v];
-                                F[u][v] += M[t];
-                                F[v][u] -= M[t];
+                                F[u][v] += M[sink];
+                                F[v][u] -= M[sink];
                                 v = u;
                             }
                             break LOOP;
@@ -52,9 +52,9 @@ public class EdmondsKarp {
                     }
                 }
             }
-            if (P[t] == -1) { // We did not find a path to t
+            if (P[sink] == -1) { // We did not find a path to t
                 int sum = 0;
-                for (int x : F[s])
+                for (int x : F[source])
                     sum += x;
                 return sum;
             }
