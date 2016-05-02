@@ -85,5 +85,7 @@ public class FlowTest {
         testAll(digraph, 0, 1500);
         digraph = generator.generate(15000, 100000, 10);
         testAll(digraph, 0, 10000);
+        digraph = generator.generate(20000, 150000, 10);
+        testAll(digraph, 0, 10000);
     }
 }
